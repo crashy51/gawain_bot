@@ -25,12 +25,24 @@ def generate_launch_description():
                     get_package_share_directory(package_name),'launch','rsp.launch.py'
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
+    default_world= os.path.join(
+        get_package_share_directory(package_name),
+        'worlds',
+        'empty.sdf'
+    )
 
+    world = LaunchConfiguration('world')
+
+    world_arg= DeclareLaunchArgument(
+        'world',
+        default_value=default_world,
+        description='World to load'
+    )
     # Include the Gazebo launch file, provided by the ros_gz_sim package
     gazebo = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')]),
-                    launch_arguments={'gz_args': ['r -v -v4 empty.sdf'], 'on_exit_shutdown': 'true'}.items()
+                    launch_arguments={'gz_args': ['r -v4 ', world], 'on_exit_shutdown': 'true'}.items()
              )
     
 
@@ -58,6 +70,7 @@ def generate_launch_description():
     # Launch them all!
     return LaunchDescription([
         rsp,
+        world_arg,
         gazebo,
         spawn_entity,
         ros_gz_bridge
